@@ -1,3 +1,4 @@
+# Global config 
 terraform {
     required_version = ">= 1.9.1"
     required_providers {
@@ -8,6 +9,33 @@ terraform {
     }
 }
 
+# Create bucket
+# resource "aws_s3_bucket" "state_locked_bucket" {
+#     bucket = "nndevs-tr-state-locked-bucket"
+#     tags = {
+#         name = "State locked bucket"
+#     }
+# }
+
+# Create DynamoDB
+# resource "aws_dynamodb_table" "dynamodb-terraform-state-lock" {
+#     name = "terraform-state-lock-dynamo"
+#     hash_key = "LockID"
+#     read_capacity = 20
+#     write_capacity = 20
+
+#     attribute {
+#         name = "LockID"
+#         type = "S"
+#     }
+
+#     tags = {
+#         name = "state lock dynamodb"
+#     }
+# }
+
+
+# Create EC2 instance
 resource "aws_instance" "ec2_example" {
     ami = var.aws_ami
     instance_type = var.instance_type
@@ -28,8 +56,11 @@ resource "aws_instance" "ec2_example" {
         private_key = file(var.private_key_path)
         timeout = "4m"
     }
+
+    depends_on = [aws_security_group.main]
 }
 
+#Create security group
 resource "aws_security_group" "main" {
     egress = [
         {
@@ -60,7 +91,7 @@ resource "aws_security_group" "main" {
     ]
 }
 
-
+# Create Access key pair 
 resource "aws_key_pair" "access_ec2_instance" {
     key_name = var.acces_key_name
     public_key = file(var.public_key_path)
